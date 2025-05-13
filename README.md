@@ -33,7 +33,8 @@ It was forked from the official debezium-examples repo and stripped down to incl
 The `config.properties` here includes two critical properties that are missing in the official example, which are essential to trigger near real-time CDC events even for small changes:
 
 ```bash
-# These 2 properties are important for triggering real time CDC events. If set to false CDC events will be sent in batches only when the max batch size is reached.
+# These 2 properties are important for triggering real time CDC events.
+# If set to false CDC events will be sent in batches only when the max batch size is reached.
 commit.log.real.time.processing.enabled=true
 commit.log.marked.complete.poll.interval.ms=1000
 ```
