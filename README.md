@@ -1,10 +1,42 @@
-# Cassandra-Debezium Proof of Concept
+# Cassandra-Debezium POC
 
-This project demonstrates how to set up and use the Debezium connector for Apache Cassandra to capture and stream data changes (Change Data Capture or CDC) to Apache Kafka.
+## Quickstart
+```bash
+# Set the Debezium version
+export DEBEZIUM_VERSION=2.1
 
-## Overview
+# Start all required containers: Cassandra, Kafka, Zookeeper, Connector
+docker-compose -f docker-compose-cassandra.yaml up --build
 
-The Cassandra-Debezium connector allows you to capture row-level changes in the tables of a Cassandra database and stream those changes to Kafka topics. This enables event-driven architectures, real-time data integration, and other use cases that require immediate reaction to data changes.
+# Consume messages from the customers topic
+winpty docker-compose -f docker-compose-cassandra.yaml exec kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --property print.key=true --topic test_prefix.testdb.customers
+
+# Connect to Cassandra CQL shell in another terminal
+winpty docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'cqlsh --keyspace=testdb'
+
+# Insert a new customer
+INSERT INTO customers(id,first_name,last_name,email) VALUES (5,'Roger','Poor','roger@poor.com');
+
+# Watch the kafka event being published in the corresponding topic
+```
+
+## References 
+- [Cassandra CDC Docs](https://cassandra.apache.org/doc/latest/cassandra/managing/operating/cdc.html)
+- [Debezium connector for Cassandra](https://debezium.io/documentation/reference/stable/connectors/cassandra.html)
+- [Official debezium examples repository](https://github.com/debezium/debezium-examples/blob/main/tutorial/README.md#using-cassandra)
+
+## Overview and important information
+
+This project demonstrates how to set up and use the Debezium connector for Apache Cassandra to capture and stream data changes (Change Data Capture or CDC) to Apache Kafka. <br>
+It was forked from the official debezium-examples repo and stripped down to include only what’s necessary for running a Cassandra CDC PoC using Debezium.
+
+The `config.properties` here includes two critical properties that are missing in the official example, which are essential to trigger near real-time CDC events even for small changes:
+
+```bash
+# These 2 properties are important for triggering real time CDC events. If set to false CDC events will be sent in batches only when the max batch size is reached.
+commit.log.real.time.processing.enabled=true
+commit.log.marked.complete.poll.interval.ms=1000
+```
 
 ## Components
 
@@ -144,9 +176,3 @@ This setup can be used for various purposes:
 3. **Audit Trail**: Maintain a complete history of data changes
 4. **Caching**: Keep caches up-to-date with the latest data
 5. **Microservices**: Enable event-driven communication between services
-
-## References
-
-- [Debezium Cassandra Connector](https://debezium.io/documentation/reference/stable/connectors/cassandra.html)
-- [Apache Cassandra Documentation](https://cassandra.apache.org/doc/latest/)
-- [Apache Kafka Documentation](https://kafka.apache.org/documentation/)
