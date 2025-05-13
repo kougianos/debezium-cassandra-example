@@ -1,0 +1,346 @@
+{
+	"schema": {
+		"type": "struct",
+		"fields": [
+			{
+				"type": "int64",
+				"optional": true,
+				"field": "id"
+			}
+		],
+		"optional": false,
+		"name": "io.debezium.connector.cassandra.test_prefix.testdb.customers.Key"
+	},
+	"payload": {
+		"id": 1
+	}
+}     
+
+{
+	"schema": {
+		"type": "struct",
+		"fields": [
+			{
+				"type": "int64",
+				"optional": false,
+				"field": "ts_ms"
+			},
+			{
+				"type": "string",
+				"optional": false,
+				"field": "op"
+			},
+			{
+				"type": "struct",
+				"fields": [
+					{
+						"type": "string",
+						"optional": false,
+						"field": "version"
+					},
+					{
+						"type": "string",
+						"optional": false,
+						"field": "connector"
+					},
+					{
+						"type": "string",
+						"optional": false,
+						"field": "name"
+					},
+					{
+						"type": "int64",
+						"optional": false,
+						"field": "ts_ms"
+					},
+					{
+						"type": "string",
+						"optional": true,
+						"name": "io.debezium.data.Enum",
+						"version": 1,
+						"parameters": {
+							"allowed": "true,last,false,incremental"
+						},
+						"default": "false",
+						"field": "snapshot"
+					},
+					{
+						"type": "string",
+						"optional": false,
+						"field": "db"
+					},
+					{
+						"type": "string",
+						"optional": true,
+						"field": "sequence"
+					},
+					{
+						"type": "string",
+						"optional": false,
+						"field": "cluster"
+					},
+					{
+						"type": "string",
+						"optional": false,
+						"field": "file"
+					},
+					{
+						"type": "int32",
+						"optional": false,
+						"field": "pos"
+					},
+					{
+						"type": "string",
+						"optional": false,
+						"field": "keyspace"
+					},
+					{
+						"type": "string",
+						"optional": false,
+						"field": "table"
+					}
+				],
+				"optional": false,
+				"name": "source",
+				"field": "source"
+			},
+			{
+				"type": "struct",
+				"fields": [
+					{
+						"type": "struct",
+						"fields": [
+							{
+								"type": "int64",
+								"optional": true,
+								"field": "value"
+							},
+							{
+								"type": "int64",
+								"optional": true,
+								"field": "deletion_ts"
+							},
+							{
+								"type": "boolean",
+								"optional": false,
+								"field": "set"
+							}
+						],
+						"optional": true,
+						"name": "cell_value",
+						"version": 1,
+						"field": "id"
+					},
+					{
+						"type": "struct",
+						"fields": [
+							{
+								"type": "string",
+								"optional": true,
+								"field": "value"
+							},
+							{
+								"type": "int64",
+								"optional": true,
+								"field": "deletion_ts"
+							},
+							{
+								"type": "boolean",
+								"optional": false,
+								"field": "set"
+							}
+						],
+						"optional": true,
+						"name": "cell_value",
+						"version": 1,
+						"field": "email"
+					},
+					{
+						"type": "struct",
+						"fields": [
+							{
+								"type": "string",
+								"optional": true,
+								"field": "value"
+							},
+							{
+								"type": "int64",
+								"optional": true,
+								"field": "deletion_ts"
+							},
+							{
+								"type": "boolean",
+								"optional": false,
+								"field": "set"
+							}
+						],
+						"optional": true,
+						"name": "cell_value",
+						"version": 1,
+						"field": "first_name"
+					},
+					{
+						"type": "struct",
+						"fields": [
+							{
+								"type": "string",
+								"optional": true,
+								"field": "value"
+							},
+							{
+								"type": "int64",
+								"optional": true,
+								"field": "deletion_ts"
+							},
+							{
+								"type": "boolean",
+								"optional": false,
+								"field": "set"
+							}
+						],
+						"optional": true,
+						"name": "cell_value",
+						"version": 1,
+						"field": "last_name"
+					},
+					{
+						"type": "struct",
+						"fields": [
+							{
+								"type": "string",
+								"optional": false,
+								"field": "method"
+							},
+							{
+								"type": "array",
+								"items": {
+									"type": "struct",
+									"fields": [
+										{
+											"type": "string",
+											"optional": false,
+											"field": "name"
+										},
+										{
+											"type": "string",
+											"optional": false,
+											"field": "value"
+										},
+										{
+											"type": "string",
+											"optional": false,
+											"field": "type"
+										}
+									],
+									"optional": false,
+									"name": "clustering_value",
+									"version": 1
+								},
+								"optional": false,
+								"name": "clustering_values",
+								"version": 1,
+								"field": "values"
+							}
+						],
+						"optional": true,
+						"name": "_range_start",
+						"version": 1,
+						"field": "_range_start"
+					},
+					{
+						"type": "struct",
+						"fields": [
+							{
+								"type": "string",
+								"optional": false,
+								"field": "method"
+							},
+							{
+								"type": "array",
+								"items": {
+									"type": "struct",
+									"fields": [
+										{
+											"type": "string",
+											"optional": false,
+											"field": "name"
+										},
+										{
+											"type": "string",
+											"optional": false,
+											"field": "value"
+										},
+										{
+											"type": "string",
+											"optional": false,
+											"field": "type"
+										}
+									],
+									"optional": false,
+									"name": "clustering_value",
+									"version": 1
+								},
+								"optional": false,
+								"name": "clustering_values",
+								"version": 1,
+								"field": "values"
+							}
+						],
+						"optional": true,
+						"name": "_range_end",
+						"version": 1,
+						"field": "_range_end"
+					}
+				],
+				"optional": false,
+				"name": "after",
+				"version": 1,
+				"field": "after"
+			}
+		],
+		"optional": false,
+		"name": "io.debezium.connector.cassandra.test_prefix.testdb.customers.Envelope"
+	},
+	"payload": {
+		"ts_ms": 1747041372967,
+		"op": "d",
+		"source": {
+			"version": "2.1.3.Final",
+			"connector": "cassandra",
+			"name": "test_prefix",
+			"ts_ms": 1747041365634,
+			"snapshot": "false",
+			"db": "NULL",
+			"sequence": null,
+			"cluster": "Test Cluster",
+			"file": "CommitLog-7-1747040694084.log",
+			"pos": 175714,
+			"keyspace": "testdb",
+			"table": "customers"
+		},
+		"after": {
+			"id": {
+				"value": 1,
+				"deletion_ts": null,
+				"set": true
+			},
+			"email": {
+				"value": null,
+				"deletion_ts": 1747041365634097,
+				"set": true
+			},
+			"first_name": {
+				"value": null,
+				"deletion_ts": 1747041365634097,
+				"set": true
+			},
+			"last_name": {
+				"value": null,
+				"deletion_ts": 1747041365634097,
+				"set": true
+			},
+			"_range_start": null,
+			"_range_end": null
+		}
+	}
+}
