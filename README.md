@@ -9,10 +9,10 @@ export DEBEZIUM_VERSION=2.1
 docker-compose -f docker-compose-cassandra.yaml up --build
 
 # Consume messages from the customers topic
-winpty docker-compose -f docker-compose-cassandra.yaml exec kafka /kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --property print.key=true --topic test_prefix.testdb.customers
+docker-compose -f docker-compose-cassandra.yaml exec kafka bash -c '/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --property print.key=true --topic test_prefix.testdb.customers'
 
 # Connect to Cassandra CQL shell in another terminal
-winpty docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'cqlsh --keyspace=testdb'
+docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'cqlsh --keyspace=testdb'
 
 # Insert a new customer
 INSERT INTO customers(id,first_name,last_name,email) VALUES (5,'Roger','Poor','roger@poor.com');
@@ -122,19 +122,39 @@ docker-compose -f docker-compose-cassandra.yaml up --build
 ### Monitor Change Events
 
 ```bash
-# Consume messages from the customers topic
-winpty docker-compose -f docker-compose-cassandra.yaml exec kafka //kafka/bin/kafka-console-consumer.sh \
+# For Linux/MacOS:
+docker-compose -f docker-compose-cassandra.yaml exec kafka /kafka/bin/kafka-console-consumer.sh \
   --bootstrap-server kafka:9092 \
   --from-beginning \
   --property print.key=true \
   --topic test_prefix.testdb.customers
+
+# For Windows (Git Bash):
+docker-compose -f docker-compose-cassandra.yaml exec kafka bash -c '/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --property print.key=true --topic test_prefix.testdb.customers'
 ```
+
+### Automated Data Generation
+
+The project includes an automatic data generator that inserts new customer records every 2 seconds. This feature is enabled by default when you start the infrastructure. You can observe the continuous stream of events in the Kafka consumer without having to manually insert records.
+
+The auto-insertion script:
+- Starts automatically after Cassandra is initialized
+- Generates unique customer records with incrementing IDs starting from 1000
+- Inserts a new record every 2 seconds
+- Outputs its activity to the `/tmp/auto-insert.log` file in the Cassandra container
+
+To view the auto-insertion logs:
+```bash
+docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'tail -f /tmp/auto-insert.log'
+```
+
+To disable this feature, you would need to modify the `startup-script.sh` file and rebuild the container.
 
 ### Modify Data to Generate Events
 
 ```bash
 # Connect to Cassandra CQL shell
-winpty docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'cqlsh --keyspace=testdb'
+docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'cqlsh --keyspace=testdb'
 
 # Insert a new customer
 INSERT INTO customers(id,first_name,last_name,email) VALUES (5,'Roger','Poor','roger@poor.com');
@@ -150,7 +170,7 @@ DELETE FROM customers WHERE id = 5;
 
 ```bash
 # Stop and remove containers, networks, and volumes
-winpty docker-compose -f docker-compose-cassandra.yaml down -v
+docker-compose -f docker-compose-cassandra.yaml down -v
 ```
 
 ## Event Structure
@@ -167,13 +187,3 @@ The `op` field in the event indicates the type of operation:
 - `c` - Create (INSERT)
 - `u` - Update (UPDATE)
 - `d` - Delete (DELETE)
-
-## Use Cases
-
-This setup can be used for various purposes:
-
-1. **Real-time Analytics**: Stream changes to analytical systems
-2. **Data Integration**: Synchronize Cassandra data with other systems
-3. **Audit Trail**: Maintain a complete history of data changes
-4. **Caching**: Keep caches up-to-date with the latest data
-5. **Microservices**: Enable event-driven communication between services

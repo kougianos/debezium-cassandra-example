@@ -5,6 +5,9 @@ services:
       - 2181:2181
       - 2888:2888
       - 3888:3888
+    volumes:
+      - zookeeper-data:/zookeeper/data
+      - zookeeper-txlog:/zookeeper/txlog
   kafka:
     image: quay.io/debezium/kafka:${DEBEZIUM_VERSION}
     ports:
@@ -13,6 +16,8 @@ services:
       - zookeeper
     environment:
       - ZOOKEEPER_CONNECT=zookeeper:2181
+    volumes:
+      - kafka-data:/kafka/data
   cassandra:
     image: debezium/example-cassandra:${DEBEZIUM_VERSION}
     build:
@@ -23,4 +28,10 @@ services:
       - zookeeper
       - kafka
     volumes:
-      - /var/lib/cassandra
+      - cassandra-data:/var/lib/cassandra
+
+volumes:
+  zookeeper-data:
+  zookeeper-txlog:
+  kafka-data:
+  cassandra-data:
