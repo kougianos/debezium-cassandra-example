@@ -13,7 +13,7 @@ export DEBEZIUM_VERSION=2.1
 echo "Stopping any running containers..."
 docker-compose -f docker-compose-cassandra.yaml down -v
 
-# Remove any dangling volumes (careful with this in production environments)
+# Remove any dangling volumes
 echo "Removing dangling volumes..."
 docker volume prune -f
 
