@@ -13,6 +13,9 @@ docker-compose -f docker-compose-cassandra.yaml up --build
 # Consume messages from the customers topic
 docker-compose -f docker-compose-cassandra.yaml exec kafka bash -c '/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --property print.key=true --topic test_prefix.testdb.customers'
 
+# To view the auto-insertion logs:
+docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'tail -f /tmp/auto-insert.log'
+
 # Connect to Cassandra CQL shell in another terminal
 docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'cqlsh --keyspace=testdb'
 
