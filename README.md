@@ -1,5 +1,7 @@
 # Cassandra-Debezium POC
 
+![image](https://github.com/user-attachments/assets/22fe0c43-ed2e-4768-993e-be2fd78e366d)
+
 ## Quickstart
 ```bash
 # Set the Debezium version
