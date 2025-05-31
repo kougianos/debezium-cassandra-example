@@ -13,6 +13,10 @@ docker-compose -f docker-compose-cassandra.yaml exec cassandra-1 bash -c 'tail -
 
 # Connect to Cassandra CQL shell in another terminal
 docker-compose -f docker-compose-cassandra.yaml exec cassandra-1 bash -c 'cqlsh --keyspace=testdb'
+
+# Start the Spring Boot service (in a separate terminal)
+cd spring-boot-cassandra
+mvn spring-boot:run
 ```
 
 ## References 
@@ -23,7 +27,7 @@ docker-compose -f docker-compose-cassandra.yaml exec cassandra-1 bash -c 'cqlsh 
 ## Overview and important information
 
 This project demonstrates how to set up and use the Debezium connector for Apache Cassandra to capture and stream data changes (Change Data Capture or CDC) to Apache Kafka. <br>
-It was forked from the official debezium-examples repo and stripped down to include only what’s necessary for running a Cassandra CDC PoC using Debezium.
+It was forked from the official debezium-examples repo and stripped down to include only what's necessary for running a Cassandra CDC PoC using Debezium.
 
 The `config.properties` here includes two critical properties that are missing in the official example, which are essential to trigger near real-time CDC events even for small changes:
 
@@ -34,15 +38,19 @@ commit.log.real.time.processing.enabled=true
 commit.log.marked.complete.poll.interval.ms=1000
 ```
 
+### Multi-Node Cluster Considerations
+
+**IMPORTANT**: This project implements a 3-node Cassandra cluster with Debezium connectors running on each node. Since database writes are replicated across all nodes and each node has its own Debezium connector capturing changes, this results in duplicate (triple) messages being published to Kafka for a single database operation. This is expected behavior in this setup and applications consuming these events must be designed to handle such duplicates.
+
 ## Components
 
 This project includes the following components:
 
-1. **Apache Cassandra** - NoSQL distributed database with CDC enabled
+1. **Apache Cassandra** - NoSQL distributed database with CDC enabled (3-node cluster)
 2. **Apache Kafka** - Distributed event streaming platform
 3. **Apache ZooKeeper** - Coordination service for distributed applications
 4. **Debezium Cassandra Connector** - The connector that captures changes from Cassandra and sends them to Kafka
-5. **Spring boot Cassandra service** - Service writing to cassandra.
+5. **Spring Boot Cassandra Service** - Service that writes transactions to Cassandra
 
 ## Project Structure
 
@@ -54,7 +62,10 @@ This project includes the following components:
   - **inventory.cql**: Sample data schema and initial data
   - **log4j.properties**: Logging configuration for the connector
   - **startup-script.sh**: Script that initializes the Cassandra instance and starts the connector
-- **Event Examples**: Sample JSON files showing the format of events produced by the connector
+- **spring-boot-cassandra/**: Spring Boot application that interacts with Cassandra
+  - **src/**: Application source code
+  - **pom.xml**: Maven project configuration
+- **kafka-output/**: Sample JSON files showing the format of events produced by the connector
   - **insert-event-example.json**: Example of an insert event
   - **update-event-example.json**: Example of an update event
   - **delete-event-example.json**: Example of a delete event
@@ -117,3 +128,40 @@ The `op` field in the event indicates the type of operation:
 - `c` - Create (INSERT)
 - `u` - Update (UPDATE)
 - `d` - Delete (DELETE)
+
+## Spring Boot Cassandra Service
+
+The project includes a Spring Boot service that demonstrates interaction with the Cassandra cluster:
+
+### Features
+
+- **Automatic Transaction Generation**: Creates random transaction records every 2 seconds
+- **Transaction Retrieval**: Periodically fetches and logs all transactions
+- **Spring Data Cassandra**: Leverages Spring Data repositories for Cassandra operations
+
+### Configuration
+
+The service is configured to connect to the Cassandra cluster with these settings:
+
+```yaml
+spring:
+  cassandra:
+    keyspace-name: testdb
+    contact-points: localhost
+    port: 9042
+    local-datacenter: datacenter1
+    schema-action: CREATE_IF_NOT_EXISTS
+```
+
+### Usage
+
+To interact with the Spring Boot service:
+
+```bash
+# Start the Spring Boot application
+cd spring-boot-cassandra
+./mvnw spring-boot:run
+
+```
+
+The service automatically generates transactions that will trigger CDC events in Cassandra, which are then captured by Debezium and published to Kafka.
