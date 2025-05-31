@@ -49,6 +49,8 @@ commit.log.marked.complete.poll.interval.ms=1000
 
 ```mermaid
 graph TD
+    linkStyle default stroke-width:2px
+
     subgraph "Spring Boot Service"
         SB[Spring Boot Application]
     end
@@ -76,16 +78,24 @@ graph TD
     SB -- "Writes Data" --> C2
     SB -- "Writes Data" --> C3
     
-    C1 -- "Replication" --> C2
-    C2 -- "Replication" --> C3
-    C3 -- "Replication" --> C1
-    
     D1 -- "Publishes CDC Events" --> K
     D2 -- "Publishes CDC Events" --> K
     D3 -- "Publishes CDC Events" --> K
     
     Z -- "Manages" --> K
     
+    %% Link coloring
+    linkStyle 0 stroke:red,color:red
+    linkStyle 1 stroke:green,color:green
+    linkStyle 2 stroke:blue,color:blue
+    linkStyle 3 stroke:red,color:red
+    linkStyle 4 stroke:green,color:green
+    linkStyle 5 stroke:blue,color:blue
+    linkStyle 6 stroke:red,color:red
+    linkStyle 7 stroke:green,color:green
+    linkStyle 8 stroke:blue,color:blue
+
+    %% Styles
     style C1 fill:#c5e8f7,stroke:#0077b6
     style C2 fill:#c5e8f7,stroke:#0077b6
     style C3 fill:#c5e8f7,stroke:#0077b6
@@ -95,14 +105,14 @@ graph TD
     style K fill:#d8f3dc,stroke:#2d6a4f
     style Z fill:#d8f3dc,stroke:#2d6a4f
     style SB fill:#ffadad,stroke:#9d0208
+
 ```
 
 As shown in the diagram:
 1. The Spring Boot service writes data to the Cassandra cluster
-2. Data is replicated across all three Cassandra nodes
-3. Each Cassandra node has its own Debezium connector that captures CDC events
-4. All three Debezium connectors publish events to Kafka
-5. This results in three events in Kafka for each database operation
+2. Each Cassandra node has its own Debezium connector that captures CDC events
+3. All three Debezium connectors publish events to Kafka
+4. This results in three events in Kafka for each database operation
 
 ## Components
 
