@@ -18,20 +18,55 @@ services:
       - ZOOKEEPER_CONNECT=zookeeper:2181
     volumes:
       - kafka-data:/kafka/data
-  cassandra:
-    image: debezium/example-cassandra:${DEBEZIUM_VERSION}
+  cassandra-1:
     build:
       context: ./debezium-cassandra-init
+    container_name: cassandra-1
+    hostname: cassandra-1
     ports:
       - 9042:9042
-    links:
-      - zookeeper
-      - kafka
+    environment:
+      - NODE_NAME=cassandra-1
+      - CASSANDRA_SEEDS=cassandra-1,cassandra-2,cassandra-3
+      - MAX_HEAP_SIZE=1024M
+      - HEAP_NEWSIZE=200M
     volumes:
-      - cassandra-data:/var/lib/cassandra
+      - cassandra-data1:/var/lib/cassandra
+
+  cassandra-2:
+    build:
+      context: ./debezium-cassandra-init
+    container_name: cassandra-2
+    hostname: cassandra-2
+    ports:
+      - 9043:9042
+    environment:
+      - NODE_NAME=cassandra-2
+      - CASSANDRA_SEEDS=cassandra-1,cassandra-2,cassandra-3
+      - MAX_HEAP_SIZE=1024M
+      - HEAP_NEWSIZE=200M
+    volumes:
+      - cassandra-data2:/var/lib/cassandra
+
+  cassandra-3:
+    build:
+      context: ./debezium-cassandra-init
+    container_name: cassandra-3
+    hostname: cassandra-3
+    ports:
+      - 9044:9042
+    environment:
+      - NODE_NAME=cassandra-3
+      - CASSANDRA_SEEDS=cassandra-1,cassandra-2,cassandra-3
+      - MAX_HEAP_SIZE=1024M
+      - HEAP_NEWSIZE=200M
+    volumes:
+      - cassandra-data3:/var/lib/cassandra
 
 volumes:
   zookeeper-data:
   zookeeper-txlog:
   kafka-data:
-  cassandra-data:
+  cassandra-data1:
+  cassandra-data2:
+  cassandra-data3:

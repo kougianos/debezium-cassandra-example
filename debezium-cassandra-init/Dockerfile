@@ -24,4 +24,4 @@ RUN chmod +x $DEBEZIUM_HOME/startup-script.sh $DEBEZIUM_HOME/auto-insert.sh &&\
 USER cassandra
 
 RUN mkdir -p $DEBEZIUM_HOME/relocation/archive $DEBEZIUM_HOME/relocation/error
-CMD $DEBEZIUM_HOME/startup-script.sh
+CMD ["sh", "/debezium/startup-script.sh"]

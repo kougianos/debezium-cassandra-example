@@ -1,0 +1,7 @@
+spring:
+  cassandra:
+    keyspace-name: testdb
+    contact-points: localhost
+    port: 9042
+    local-datacenter: datacenter1
+    schema-action: CREATE_IF_NOT_EXISTS

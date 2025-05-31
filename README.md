@@ -1,28 +1,24 @@
 # Cassandra-Debezium POC
 
-![image](https://github.com/user-attachments/assets/22fe0c43-ed2e-4768-993e-be2fd78e366d)
-
 ## Quickstart
 ```bash
 # Set the Debezium version
 export DEBEZIUM_VERSION=2.1
 
+# Clean start script which starts all containers with clean volumes
+./clean-start.sh
+
 # Start all required containers: Cassandra, Kafka, Zookeeper, Connector
 docker-compose -f docker-compose-cassandra.yaml up --build
 
-# Consume messages from the customers topic
-docker-compose -f docker-compose-cassandra.yaml exec kafka bash -c '/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --property print.key=true --topic test_prefix.testdb.customers'
+# Consume messages from the transactions topic
+docker-compose -f docker-compose-cassandra.yaml exec kafka bash -c '/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --property print.key=true --topic test_prefix.testdb.transactions'
 
 # To view the auto-insertion logs:
 docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'tail -f /tmp/auto-insert.log'
 
 # Connect to Cassandra CQL shell in another terminal
 docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'cqlsh --keyspace=testdb'
-
-# Insert a new customer
-INSERT INTO customers(id,first_name,last_name,email) VALUES (5,'Roger','Poor','roger@poor.com');
-
-# Watch the kafka event being published in the corresponding topic
 ```
 
 ## References 
@@ -70,23 +66,28 @@ This project includes the following components:
 
 ## Database Schema
 
-The sample database (`testdb`) includes the following tables, all with CDC enabled:
+The sample database (`testdb`) includes the following table with CDC enabled:
 
-1. **products**: Product catalog with fields:
-   - id (primary key)
-   - name
-   - description
-   - weight
+**transactions**: Gaming transaction data with fields:
+   - operator_id (partition key)
+   - player_id (partition key)
+   - date (partition key)
+   - id (clustering key, TIMEUUID)
+   - amount (DECIMAL)
+   - bonus_type (SMALLINT)
+   - currency (ASCII)
+   - external_id (ASCII)
+   - game_session_id (ASCII)
+   - instance_id (ASCII)
+   - jackpot_amount (DECIMAL)
+   - jackpot_id (ASCII)
+   - jackpot_level (SMALLINT)
+   - round (BIGINT)
+   - step (BIGINT)
+   - type (SMALLINT)
+   - version_id (ASCII)
 
-2. **products_on_hand**: Inventory information with fields:
-   - product_id (primary key)
-   - quantity
-
-3. **customers**: Customer information with fields:
-   - id (primary key)
-   - first_name
-   - last_name
-   - email
+The table uses a composite partition key (operator_id, player_id, date) with id as a clustering column, optimizing queries by gaming operator, player, and date.
 
 ## How It Works
 
@@ -124,27 +125,13 @@ export DEBEZIUM_VERSION=2.1
 docker-compose -f docker-compose-cassandra.yaml up --build
 ```
 
-### Monitor Change Events
-
-```bash
-# For Linux/MacOS:
-docker-compose -f docker-compose-cassandra.yaml exec kafka /kafka/bin/kafka-console-consumer.sh \
-  --bootstrap-server kafka:9092 \
-  --from-beginning \
-  --property print.key=true \
-  --topic test_prefix.testdb.customers
-
-# For Windows (Git Bash):
-docker-compose -f docker-compose-cassandra.yaml exec kafka bash -c '/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --property print.key=true --topic test_prefix.testdb.customers'
-```
-
 ### Automated Data Generation
 
-The project includes an automatic data generator that inserts new customer records every 2 seconds. This feature is enabled by default when you start the infrastructure. You can observe the continuous stream of events in the Kafka consumer without having to manually insert records.
+The project includes an automatic data generator that inserts new transaction records every 2 seconds. This feature is enabled by default when you start the infrastructure. You can observe the continuous stream of events in the Kafka consumer without having to manually insert records.
 
 The auto-insertion script:
 - Starts automatically after Cassandra is initialized
-- Generates unique customer records with incrementing IDs starting from 1000
+- Generates unique transaction records with incrementing IDs starting from 1000
 - Inserts a new record every 2 seconds
 - Outputs its activity to the `/tmp/auto-insert.log` file in the Cassandra container
 
@@ -154,22 +141,6 @@ docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'tail -f 
 ```
 
 To disable this feature, you would need to modify the `startup-script.sh` file and rebuild the container.
-
-### Modify Data to Generate Events
-
-```bash
-# Connect to Cassandra CQL shell
-docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'cqlsh --keyspace=testdb'
-
-# Insert a new customer
-INSERT INTO customers(id,first_name,last_name,email) VALUES (5,'Roger','Poor','roger@poor.com');
-
-# Update a customer
-UPDATE customers set first_name = 'Barry' where id = 5;
-
-# Delete a customer
-DELETE FROM customers WHERE id = 5;
-```
 
 ### Shut Down
 
