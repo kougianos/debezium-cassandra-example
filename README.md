@@ -42,6 +42,68 @@ commit.log.marked.complete.poll.interval.ms=1000
 
 **IMPORTANT**: This project implements a 3-node Cassandra cluster with Debezium connectors running on each node. Since database writes are replicated across all nodes and each node has its own Debezium connector capturing changes, this results in duplicate (triple) messages being published to Kafka for a single database operation. This is expected behavior in this setup and applications consuming these events must be designed to handle such duplicates.
 
+## Simple diagram
+![image](https://github.com/user-attachments/assets/22fe0c43-ed2e-4768-993e-be2fd78e366d)
+
+## Complete Architecture
+
+```mermaid
+graph TD
+    subgraph "Spring Boot Service"
+        SB[Spring Boot Application]
+    end
+
+    subgraph "Cassandra Cluster"
+        subgraph "Node 1"
+            C1[Cassandra DB] -- "CDC" --> D1[Debezium Connector]
+        end
+        
+        subgraph "Node 2"
+            C2[Cassandra DB] -- "CDC" --> D2[Debezium Connector]
+        end
+        
+        subgraph "Node 3"
+            C3[Cassandra DB] -- "CDC" --> D3[Debezium Connector]
+        end
+    end
+    
+    subgraph "Kafka"
+        K[Kafka Broker]
+        Z[ZooKeeper]
+    end
+    
+    SB -- "Writes Data" --> C1
+    SB -- "Writes Data" --> C2
+    SB -- "Writes Data" --> C3
+    
+    C1 -- "Replication" --> C2
+    C2 -- "Replication" --> C3
+    C3 -- "Replication" --> C1
+    
+    D1 -- "Publishes CDC Events" --> K
+    D2 -- "Publishes CDC Events" --> K
+    D3 -- "Publishes CDC Events" --> K
+    
+    Z -- "Manages" --> K
+    
+    style C1 fill:#c5e8f7,stroke:#0077b6
+    style C2 fill:#c5e8f7,stroke:#0077b6
+    style C3 fill:#c5e8f7,stroke:#0077b6
+    style D1 fill:#ffe8d6,stroke:#bc6c25
+    style D2 fill:#ffe8d6,stroke:#bc6c25
+    style D3 fill:#ffe8d6,stroke:#bc6c25
+    style K fill:#d8f3dc,stroke:#2d6a4f
+    style Z fill:#d8f3dc,stroke:#2d6a4f
+    style SB fill:#ffadad,stroke:#9d0208
+```
+
+As shown in the diagram:
+1. The Spring Boot service writes data to the Cassandra cluster
+2. Data is replicated across all three Cassandra nodes
+3. Each Cassandra node has its own Debezium connector that captures CDC events
+4. All three Debezium connectors publish events to Kafka
+5. This results in three events in Kafka for each database operation
+
 ## Components
 
 This project includes the following components:
@@ -160,8 +222,7 @@ To interact with the Spring Boot service:
 ```bash
 # Start the Spring Boot application
 cd spring-boot-cassandra
-./mvnw spring-boot:run
-
+mvn spring-boot:run
 ```
 
 The service automatically generates transactions that will trigger CDC events in Cassandra, which are then captured by Debezium and published to Kafka.
