@@ -2,23 +2,17 @@
 
 ## Quickstart
 ```bash
-# Set the Debezium version
-export DEBEZIUM_VERSION=2.1
-
 # Clean start script which starts all containers with clean volumes
 ./clean-start.sh
-
-# Start all required containers: Cassandra, Kafka, Zookeeper, Connector
-docker-compose -f docker-compose-cassandra.yaml up --build
 
 # Consume messages from the transactions topic
 docker-compose -f docker-compose-cassandra.yaml exec kafka bash -c '/kafka/bin/kafka-console-consumer.sh --bootstrap-server kafka:9092 --from-beginning --property print.key=true --topic test_prefix.testdb.transactions'
 
-# To view the auto-insertion logs:
-docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'tail -f /tmp/auto-insert.log'
+# To view the auto-insertion logs (auto insert disabled by default):
+docker-compose -f docker-compose-cassandra.yaml exec cassandra-1 bash -c 'tail -f /tmp/auto-insert.log'
 
 # Connect to Cassandra CQL shell in another terminal
-docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'cqlsh --keyspace=testdb'
+docker-compose -f docker-compose-cassandra.yaml exec cassandra-1 bash -c 'cqlsh --keyspace=testdb'
 ```
 
 ## References 
@@ -48,6 +42,7 @@ This project includes the following components:
 2. **Apache Kafka** - Distributed event streaming platform
 3. **Apache ZooKeeper** - Coordination service for distributed applications
 4. **Debezium Cassandra Connector** - The connector that captures changes from Cassandra and sends them to Kafka
+5. **Spring boot Cassandra service** - Service writing to cassandra.
 
 ## Project Structure
 
@@ -107,47 +102,6 @@ Key configuration properties for the Debezium connector include:
 - `topic.prefix`: Prefix for Kafka topics (set to "test_prefix")
 - `snapshot.mode`: Controls how initial snapshots are taken (set to "ALWAYS")
 - `commit.log.real.time.processing.enabled`: Enables real-time CDC event triggering
-
-## Running the Project
-
-### Prerequisites
-
-- Docker and Docker Compose installed
-- Sufficient system resources to run the containers
-
-### Start the Infrastructure
-
-```bash
-# Set the Debezium version
-export DEBEZIUM_VERSION=2.1
-
-# Start the containers
-docker-compose -f docker-compose-cassandra.yaml up --build
-```
-
-### Automated Data Generation
-
-The project includes an automatic data generator that inserts new transaction records every 2 seconds. This feature is enabled by default when you start the infrastructure. You can observe the continuous stream of events in the Kafka consumer without having to manually insert records.
-
-The auto-insertion script:
-- Starts automatically after Cassandra is initialized
-- Generates unique transaction records with incrementing IDs starting from 1000
-- Inserts a new record every 2 seconds
-- Outputs its activity to the `/tmp/auto-insert.log` file in the Cassandra container
-
-To view the auto-insertion logs:
-```bash
-docker-compose -f docker-compose-cassandra.yaml exec cassandra bash -c 'tail -f /tmp/auto-insert.log'
-```
-
-To disable this feature, you would need to modify the `startup-script.sh` file and rebuild the container.
-
-### Shut Down
-
-```bash
-# Stop and remove containers, networks, and volumes
-docker-compose -f docker-compose-cassandra.yaml down -v
-```
 
 ## Event Structure
 
