@@ -29,18 +29,22 @@ mvn spring-boot:run
 This project demonstrates how to set up and use the Debezium connector for Apache Cassandra to capture and stream data changes (Change Data Capture or CDC) to Apache Kafka. <br>
 It was forked from the official debezium-examples repo and stripped down to include only what's necessary for running a Cassandra CDC PoC using Debezium.
 
-The `config.properties` here includes two critical properties that are missing in the official example, which are essential to trigger near real-time CDC events even for small changes:
+> 💡 **Important notes**
+> 
+> This project's `config.properties` file — used by the Debezium Cassandra connector — includes two crucial settings that are missing from the official Debezium examples.  
+> These settings are essential for triggering **near real-time CDC events**, even for small database changes:
+>
+> ```properties
+> # These 2 properties are important for triggering real time CDC events.
+> # If set to false, CDC events will be sent in batches only when the max batch size is reached.
+> commit.log.real.time.processing.enabled=true
+> commit.log.marked.complete.poll.interval.ms=1000
+> ```
 
-```bash
-# These 2 properties are important for triggering real time CDC events.
-# If set to false CDC events will be sent in batches only when the max batch size is reached.
-commit.log.real.time.processing.enabled=true
-commit.log.marked.complete.poll.interval.ms=1000
-```
 
 ### Multi-Node Cluster Considerations
 
-**IMPORTANT**: This project implements a 3-node Cassandra cluster with Debezium connectors running on each node. Since database writes are replicated across all nodes and each node has its own Debezium connector capturing changes, this results in duplicate (triple) messages being published to Kafka for a single database operation. This is expected behavior in this setup and applications consuming these events must be designed to handle such duplicates.
+**Important**: Also, this project implements a 3-node Cassandra cluster with Debezium connectors running on each node. Since database writes are replicated across all nodes and each node has its own Debezium connector capturing changes, this results in duplicate (triple) messages being published to Kafka for a single database operation. This is expected behavior in this setup and applications consuming these events must be designed to handle such duplicates.
 
 ## Simple diagram
 ![image](https://github.com/user-attachments/assets/22fe0c43-ed2e-4768-993e-be2fd78e366d)
