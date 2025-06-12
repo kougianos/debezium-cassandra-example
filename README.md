@@ -150,26 +150,26 @@ This project includes the following components:
 
 The sample database (`testdb`) includes the following table with CDC enabled:
 
-**transactions**: Gaming transaction data with fields:
-   - operator_id (partition key)
-   - player_id (partition key)
-   - date (partition key)
-   - id (clustering key, TIMEUUID)
-   - amount (DECIMAL)
-   - bonus_type (SMALLINT)
-   - currency (ASCII)
-   - external_id (ASCII)
-   - game_session_id (ASCII)
-   - instance_id (ASCII)
-   - jackpot_amount (DECIMAL)
-   - jackpot_id (ASCII)
-   - jackpot_level (SMALLINT)
-   - round (BIGINT)
-   - step (BIGINT)
-   - type (SMALLINT)
-   - version_id (ASCII)
-
-The table uses a composite partition key (operator_id, player_id, date) with id as a clustering column, optimizing queries by gaming operator, player, and date.
+**transactions**: Transaction data with fields:
+| Column Name       | Type     | Key Type       | Description                        |
+| ----------------- | -------- | -------------- | ---------------------------------- |
+| `operator_id`     | ASCII    | Partition key  | Gaming operator ID                 |
+| `player_id`       | ASCII    | Partition key  | Player identifier                  |
+| `date`            | ASCII    | Partition key  | Event date                         |
+| `id`              | TIMEUUID | Clustering key | Unique event identifier            |
+| `amount`          | DECIMAL  | —              | Transaction amount                 |
+| `bonus_type`      | SMALLINT | —              | Type of bonus applied              |
+| `currency`        | ASCII    | —              | Transaction currency               |
+| `external_id`     | ASCII    | —              | External transaction reference     |
+| `game_session_id` | ASCII    | —              | Game session identifier            |
+| `instance_id`     | ASCII    | —              | Game instance identifier           |
+| `jackpot_amount`  | DECIMAL  | —              | Amount won via jackpot             |
+| `jackpot_id`      | ASCII    | —              | Jackpot identifier                 |
+| `jackpot_level`   | SMALLINT | —              | Level of the jackpot               |
+| `round`           | BIGINT   | —              | Game round                         |
+| `step`            | BIGINT   | —              | Game step within the round         |
+| `type`            | SMALLINT | —              | Transaction type                   |
+| `version_id`      | ASCII    | —              | Schema or logic version identifier |
 
 ## How It Works
 
