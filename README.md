@@ -1,4 +1,4 @@
-# Cassandra-Debezium POC
+# Cassandra-Debezium Proof of Concept
 
 ## Quickstart
 ```bash
